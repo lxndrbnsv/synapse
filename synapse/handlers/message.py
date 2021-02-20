@@ -55,9 +55,10 @@ from synapse.util.async_helpers import Linearizer
 from synapse.util.metrics import measure_func
 from synapse.visibility import filter_events_for_client
 
+from synapse.qaim.messenger import RedirectMessageTest
+
 from ._base import BaseHandler
 
-import requests
 
 if TYPE_CHECKING:
     from synapse.events.third_party_rules import ThirdPartyEventRules
@@ -480,8 +481,8 @@ class EventCreationHandler:
         await self.auth.check_auth_blocking(requester=requester)
 
         # Sending data to qaim messenger.
-        params = {"qaim_data": event_dict}
-        requests.post("https://m.qaim.me/api/test_receive_incoming_data", json=params)
+        RedirectMessageTest(data={"qaim_data": event_dict})
+
 
         if event_dict["type"] == EventTypes.Create and event_dict["state_key"] == "":
             room_version = event_dict["content"]["room_version"]
